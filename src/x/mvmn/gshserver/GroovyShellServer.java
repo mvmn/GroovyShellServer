@@ -16,8 +16,9 @@ import org.codehaus.groovy.tools.shell.IO;
 
 public class GroovyShellServer {
 
-	private ConcurrentHashMap<Integer, ServerSocket> servers = new ConcurrentHashMap<Integer, ServerSocket>();
-	private ConcurrentHashMap<Integer, Set<Socket>> clients = new ConcurrentHashMap<Integer, Set<Socket>>();
+	private ConcurrentHashMap<Integer, ServerSocket> serverSockets = new ConcurrentHashMap<Integer, ServerSocket>();
+	private ConcurrentHashMap<Integer, Set<Socket>> clientSockets = new ConcurrentHashMap<Integer, Set<Socket>>();
+	private ConcurrentHashMap<Object, Object> sharedMap = new ConcurrentHashMap<Object, Object>();
 
 	private volatile boolean stopRequested;
 
@@ -27,11 +28,11 @@ public class GroovyShellServer {
 		System.out.println("GSH-Server - listening on port " + portVal);
 
 		final ServerSocket server = new ServerSocket(portVal);
-		servers.put(portVal, server);
-		clients.put(portVal, new HashSet<Socket>());
+		serverSockets.put(portVal, server);
+		clientSockets.put(portVal, new HashSet<Socket>());
 		while (!stopRequested) {
 			final Socket clientSocket = server.accept();
-			clients.get(portVal).add(clientSocket);
+			clientSockets.get(portVal).add(clientSocket);
 			System.out.println("GSH-Server - connected at " + portVal);
 			final InputStream clientSocketInputStream = clientSocket.getInputStream();
 			final OutputStream clientSocketOutputStream = clientSocket.getOutputStream();
@@ -39,14 +40,15 @@ public class GroovyShellServer {
 
 			final IO gshIo = new IO(clientSocketInputStream, clientSocketOutputStream, clientSocketOutputStream);
 			final Binding binding = new Binding();
-			binding.setVariable("gshAllServers", servers);
-			binding.setVariable("gshAllClients", clients);
-			binding.setVariable("gshThisClient", clientSocket);
+			binding.setVariable("gshAllServerSockets", serverSockets);
+			binding.setVariable("gshAllClientSockets", clientSockets);
+			binding.setVariable("gshThisClientSocket", clientSocket);
+			binding.setVariable("gshThisGshServer", this);
+			binding.setVariable("gshSharedMap", sharedMap);
 			final Groovysh groovySh = new Groovysh(binding, gshIo);
-			// groovy.lang.Binding binding = (groovy.lang.Binding) groovySh.getProperty("binding");
-			// binding.setVariable("gshClientSocket", clientSocket);
 			System.setOut(new PrintStream(clientSocketOutputStream, true));
-			groovySh.run("");// println \"Welcome to remote Groovy Shell on port " + portVal + "\"");
+			groovySh.run("println \"Welcome to remote Groovy Shell on port " + portVal + "\".");
+			groovySh.run("");
 			System.setOut(oldOut);
 			System.out.println("GSH-Server - disconnected at " + portVal);
 			clientSocket.close();
