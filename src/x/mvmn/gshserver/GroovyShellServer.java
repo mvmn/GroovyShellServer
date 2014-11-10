@@ -47,7 +47,7 @@ public class GroovyShellServer {
 			binding.setVariable("gshSharedMap", sharedMap);
 			final Groovysh groovySh = new Groovysh(binding, gshIo);
 			System.setOut(new PrintStream(clientSocketOutputStream, true));
-			groovySh.run("println \"Welcome to remote Groovy Shell on port " + portVal + "\".");
+			groovySh.run("println \"Welcome to remote Groovy Shell on port " + portVal + ".\"");
 			groovySh.run("");
 			System.setOut(oldOut);
 			System.out.println("GSH-Server - disconnected at " + portVal);
