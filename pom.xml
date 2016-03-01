@@ -4,6 +4,11 @@
 	<groupId>GroovyShellServer</groupId>
 	<artifactId>GroovyShellServer</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+		<mainClass>x.mvmn.gshserver.GroovyShellServer</mainClass>
+	</properties>
+
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -23,7 +28,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>x.mvmn.gshserver.GroovyShellServer</mainClass>
+							<mainClass>${mainClass}</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -40,7 +45,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>x.mvmn.gshserver.GroovyShellServer</mainClass>
+					<mainClass>${mainClass}</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>
